@@ -1,5 +1,4 @@
 import java.util.Stack;
-// Guy and Yair's project 
 
 /**
  *
@@ -23,7 +22,7 @@ public class AVLTree {
    * Returns true if and only if the tree is empty.
    *
    */
-  public boolean empty() {
+  public boolean empty() { // Time Complexity O(1)
 	  if (root==null) {
 		  return true;
 	  }
@@ -71,25 +70,25 @@ public class AVLTree {
    */
    public int insert(int k, String i) {
 	   
-	   if (root == null) {
-		   
+	   if (root == null) {  // Spacial case, if the tree is empty, insert the new element as the tree root
 		   root = new AVLNode(k,i);
 		   return 0;
 	   }
 	   
 	   
-	   IAVLNode relevatParent = recGetInsertionParent(root,k);
+	   IAVLNode relevatParent = getInsertionParent(root,k); /* 1st step - use this function to find the right node which the new element should be added to.
+	   might be his left son or right son*/
 	   
-	   if (relevatParent == null) {
+	   if (relevatParent == null) { // means the key is already in the tree
 		   return -1;
 	   }
-	   Insertion(relevatParent,k,i);
-	   
-	   
-	  return getMoves(relevatParent);
+
+	   Insertion(relevatParent,k,i); // 2nd step - use this function to make the actual Insertion not including the balance operation
+
+	  return getMoves(relevatParent); // 3rd step - make this function to count the balanced moves, including making the balance operations
    }
    
-   public IAVLNode recGetInsertionParent (IAVLNode node, int k) {
+   public IAVLNode getInsertionParent (IAVLNode node, int k) {
 	   while (node.isRealNode()) {
 		  if (node.getKey() == k) {
 			  return null;
@@ -103,14 +102,10 @@ public class AVLTree {
 	   return node.getParent();
    }
    
-   public void Insertion (IAVLNode node, int k, String i) {
+   private void Insertion (IAVLNode node, int k, String i) {
+
 	   IAVLNode newNode = new AVLNode(k,i);
-	   
-	   
-	  /* if ( node.getRight() == null && node.getLeft() == null) {
-		   node.setHeight(node.getHeight()+1);
-	   }*/
-	   
+
 	   if (k < node.getKey()) {
 		   
 		   node.setLeft(newNode);
@@ -119,8 +114,7 @@ public class AVLTree {
 		   
 		   node.setRight(newNode);
 	   }
-	   //newNode.getLeft().setParent(newNode);
-	   //newNode.getRight().setParent(newNode);
+
 	   newNode.setParent(node);
 	   
 	   
@@ -128,18 +122,10 @@ public class AVLTree {
    
    public int getMoves(IAVLNode parent) {
 	   int move = 0;
-	   
-	   
-	   while (parent != null) { // to checkkkk!!!!!!!!
-		   int deltaRight =parent.getHeight() - parent.getRight().getHeight() ;
-		   int deltaLeft = parent.getHeight() -parent.getLeft().getHeight();
-		   /*System.out.println(parent.getHeight());
-		   System.out.println(deltaRight);
-		   System.out.println(deltaLeft);*/
+	   while (parent != null) { // to checkkkk ?
+		   int deltaRight =parent.getHeight() - parent.getRight().getHeight() ; // the right edge of current node
+		   int deltaLeft = parent.getHeight() -parent.getLeft().getHeight(); // the left edge of the current node
 
-		   
-		   
-		   
 		   // case 1
 		   if (deltaRight == 1 && deltaLeft == 1)  {
 			   return move; // no more balance steps are required 
@@ -164,7 +150,7 @@ public class AVLTree {
 				   move ++;
 				   return move; // then problem solved 
 				   
-			   }else if (sDeltaL == 2 && sDeltaR == 1) { // double rotation are needed 
+			   }else if (sDeltaL == 2 && sDeltaR == 1) { // double rotation is needed
 				   rotationLeft( parent.getLeft() , parent.getLeft().getRight());
 				   rotationRight( parent , parent.getLeft());
 				   parent.getParent().setHeight(parent.getParent().getHeight()+1);
@@ -186,7 +172,7 @@ public class AVLTree {
 					   move ++;
 					   return move;
 					   
-				   }else if (sDeltaL == 1 && sDeltaR == 2) { // double rotation are needed
+				   }else if (sDeltaL == 1 && sDeltaR == 2) { // double rotation is needed
 					   rotationRight( parent.getRight() , parent.getRight().getLeft());
 					   rotationLeft( parent , parent.getRight());
 					   parent.getParent().setHeight(parent.getParent().getHeight()+1);
@@ -211,19 +197,13 @@ public class AVLTree {
 		   
 	   if (father.getParent().getLeft() == father) {
 		   father.getParent().setLeft(son);
-		   
 	   }
 	   else {
 		   father.getParent().setRight(son);
-		   
 	   }
-	   
 	   son.setParent(father.getParent());
-	   
-	   
+
 	  }
-	   
-	   
 	   else {
 		   son.setParent(null);
 		   root = son;
@@ -240,15 +220,11 @@ public class AVLTree {
 	   if (father.getParent() != null ) {
 		   if (father.getParent().getRight() == father) {
 		   father.getParent().setRight(son);
-		   
 	   }
 	   else {
 		   father.getParent().setLeft(son);
-		   
 	   }
-		   
 	   son.setParent(father.getParent());
-		   
 	  }
 	   else {
 		   son.setParent(null);
@@ -368,9 +344,43 @@ public class AVLTree {
    * sorted by their respective keys,
    * or an empty array if the tree is empty.
    */
-  public String[] infoToArray()
-  {
-        return new String[55]; // to be replaced by student code
+  public String[] infoToArray() {
+
+	  if (this.empty()){ // case that the tree is empty 
+		  return new String [0];
+	  }
+
+	  int n = this.size();
+	  String [] infoArray = new String [n];
+	  IAVLNode tempnode;
+
+	  IAVLNode current = root;
+	  Stack tem = new Stack();
+	  int j = 0;
+
+
+	  while (current.isRealNode() || !tem.empty()){
+
+		  while (current.isRealNode()){
+
+			  tem.push(current);
+			  current = current.getLeft();
+
+		  }
+
+		 current = (IAVLNode) tem.pop();
+		  infoArray[j] = current.getValue();
+		  j++;
+		  current = current.getRight();
+
+	  }
+
+	  return infoArray;
+
+
+
+
+
   }
 
    /**
