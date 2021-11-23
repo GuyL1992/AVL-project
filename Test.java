@@ -4,34 +4,34 @@ public static void main (String args[]) {
 	
 	
 	AVLTree avlTree = new AVLTree();
-	System.out.println(avlTree.insert(6, "Yair"));
-	System.out.println(avlTree.insert(10, "Yair"));
-	System.out.println(avlTree.insert(4, "Yair"));
-	System.out.println(avlTree.insert(3, " 3 is min"));
-	System.out.println(avlTree.insert(5, "Yair"));
-	System.out.println(avlTree.insert(14, "Yair"));
-	avlTree.insert(8, "Yair");
-	avlTree.insert(16, " 16 is max");
-	System.out.println(avlTree.insert(15, "Yair"));
-	System.out.println(avlTree.root.getRight().getRight().getKey());
-	System.out.println(avlTree.min());
-	System.out.println(avlTree.max());
-	
-	
-	/*int [] keys = avlTree.keysToArray();
-	for (int i=0; i<keys.length; i ++) {
-		System.out.println(keys[i]);
 
-	}
-	
-	System.out.println(avlTree.size());
+    for(int i = 0; i < 10; i ++){
+        avlTree.insert(i, "yair");
+    }
 
-	//System.out.println(avlTree.insert(15, "Yair"));   */
-	
+    System.out.println(avlTree.delete(3));
+    System.out.println(avlTree.delete(2));
+    System.out.println(avlTree.delete(7));
+    System.out.println(avlTree.delete(8));
 
-	
-	
-	
+
+
+
+
+
+
+
+
+
+
+
+    //System.out.println(avlTree.delete(6));
+    //System.out.println(avlTree.root.getRight().getHeight());
+
+    //avlTree.insert(8,"guy");
+
+    AVLTree.printBinaryTree(avlTree.getRoot(), 0,5);
+
 	
 }
 
