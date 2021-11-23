@@ -251,12 +251,295 @@ public class AVLTree {
    * A promotion/rotation counts as one re-balance operation, double-rotation is counted as 2.
    * Returns -1 if an item with key k was not found in the tree.
    */
-   public int delete(int k)
-   {
-	   return 421;	// to be replaced by student code
-   }
+  public int delete(int k)
+  {
 
-   /**
+	  if (root == null){ // edge case 1 - empty tree
+
+		  return -1;
+
+	  } // edge case 1 - tree is empty
+
+	  IAVLNode toBeDeleted = SearchNode(root,k); // step 1- find the node with key == k  , TC = (O(log(n))
+
+	  if (toBeDeleted == null){ // means 'toBeDeleted' was not found
+
+		  return -1;
+	  }
+
+	  IAVLNode parent = deletion(toBeDeleted); // parent is the node which the correction should be start from
+
+	  if (parent == null){ // edge case 2 - tree size == 1
+		  return -1;
+	  }
+
+
+
+	  return getMovesdelete(parent);
+  }
+
+	public IAVLNode deletion (IAVLNode toBeDeleted){ // executing the deletion, and return the node wich the correction should be start from
+
+		IAVLNode parent = toBeDeleted.getParent();
+
+		if (toBeDeleted == root && !root.getLeft().isRealNode() && !root.getRight().isRealNode()){ // edge case 2 - tree size == 1
+			root = null;
+			return null;
+		}
+
+		if (!toBeDeleted.getLeft().isRealNode() && !toBeDeleted.getRight().isRealNode()){ // case 1 - node is a leaf
+
+			if (parent.getRight() == toBeDeleted){ // "toBeDeleted" is the right son
+
+				parent.setRight(toBeDeleted.getRight());
+				parent.getRight().setParent(parent);
+
+
+			}else{ // "toBeDeleted" is the left son
+
+				parent.setLeft(toBeDeleted.getLeft());
+
+			}
+
+			toBeDeleted.setParent(null);
+
+		} // case 1 - node is a leaf
+
+		else if(!toBeDeleted.getLeft().isRealNode() || !toBeDeleted.getRight().isRealNode()){ // case 2 - "toBeDeleted" is an unary node
+
+			IAVLNode temp;
+
+			temp = toBeDeleted.getRight().isRealNode() ? toBeDeleted.getRight() : toBeDeleted.getLeft();
+
+			if (parent != null) {
+
+				if (parent.getRight() == toBeDeleted) { // "toBeDeleted" is the right son
+
+					parent.setRight(temp);
+
+
+				} else { // "toBeDeleted" is the left son
+
+					parent.setLeft(temp);
+
+				}
+			} else { // parent == null - root is an unary node
+
+				root = root.getRight().isRealNode() ? root.getRight() : root.getLeft();
+
+			}
+
+			temp.setParent(parent);
+
+			toBeDeleted.setParent(null);
+
+		}else{ // case 3 -  "toBeDeleted" has two sons
+
+			IAVLNode successor = getSuccessor(toBeDeleted); // get the Successor - TC - O(log(n))
+
+			swapNodes(toBeDeleted,successor); // O(1)
+
+
+			 parent = deletion(toBeDeleted);
+
+		}
+
+		return parent;
+
+	}
+
+	public IAVLNode getSuccessor (IAVLNode node){ // return node's successor
+
+		IAVLNode successor = node.getRight();
+
+		while (successor.getLeft().isRealNode()){
+
+			successor = successor.getLeft();
+		}
+
+		return successor;
+
+	}
+
+
+	public IAVLNode SearchNode (IAVLNode node,int k) {
+		if (!node.isRealNode()) {
+			return null;
+		}
+		if (node.getKey() == k) {
+			return node;
+		}else if(node.getKey() > k) {
+			return SearchNode(node.getLeft(),k);
+		}else  {
+			return SearchNode(node.getRight(),k);
+		}
+	}
+
+	public static void swapNodes (IAVLNode toBeDeleted, IAVLNode successor){
+
+		IAVLNode tempSLeftSon = successor.getLeft();
+		IAVLNode temoSRightSon = successor.getRight();
+		IAVLNode tempSParent = successor.getParent();
+
+
+		if (toBeDeleted == root){
+
+			root = successor;
+			successor.setParent(null);
+
+		}else{
+
+			successor.setParent(toBeDeleted.getParent());
+
+			if(toBeDeleted.getParent().getRight() == toBeDeleted){
+				toBeDeleted.getParent().setRight(successor);
+			}else{
+				toBeDeleted.getParent().setLeft(successor);
+			}
+
+		}
+
+		if(toBeDeleted.getRight() == successor){
+			successor.setRight(toBeDeleted);
+			toBeDeleted.setParent(successor);
+		}else{
+			toBeDeleted.setParent(tempSParent);
+			tempSParent.setLeft(toBeDeleted);
+			successor.setRight(toBeDeleted.getRight());
+		}
+
+		successor.getRight().setParent(successor);
+		successor.setLeft(toBeDeleted.getLeft());
+		successor.getLeft().setParent(successor);
+
+		toBeDeleted.setRight(temoSRightSon);
+		toBeDeleted.setLeft(tempSLeftSon);
+		toBeDeleted.getLeft().setParent(toBeDeleted);
+		toBeDeleted.getRight().setParent(toBeDeleted);
+		successor.setHeight(toBeDeleted.getHeight());
+
+	}
+
+
+
+	public int getMovesdelete (IAVLNode parent){
+
+	  int moves = 0;
+
+	  while (parent != null){
+
+		  if(correctRanks(parent)){ // no rebalance is needed
+			  return moves;
+		  }
+
+		  int dL = parent. getHeight() - parent.getLeft().getHeight();
+		  int dR = parent. getHeight() - parent.getRight().getHeight();
+
+
+		  if (dL == 2 && dR ==2){ // case 1 - dL == 2 & dR == 2
+
+			  parent.setHeight(parent.getHeight()-1); // demote parent
+			  moves += 1;
+
+
+		  } // case 1 - dL == 2 & dR == 2
+
+		 else  if(dL == 3 && dR == 1){ // case 2A - dL == 3 &&  dR == 1
+
+			  int sDeltaL = parent.getRight().getHeight()-parent.getRight().getLeft().getHeight(); // we need to observe the status of the leftSon
+			  int sDeltaR = parent.getRight().getHeight()-parent.getRight().getRight().getHeight();
+
+			   if (sDeltaL == 1 && sDeltaR == 1){ // case 2Aa sDeltaL == SDeltaR == 1
+
+				   rotationLeft(parent,parent.getRight()); // z , y
+				   parent.getParent().setHeight(parent.getParent().getHeight() + 1); // after the rotation we need also to promote y, z demote included in the rotation method
+				   moves ++;
+
+			   } // case 2Aa sDeltaL == SDeltaR == 1
+
+			   if (sDeltaL == 1 && sDeltaR == 2){ //  case 2Ab sDeltaL == 1 SDeltaR == 2 - double rotation is needed
+
+				   rotationRight(parent.getRight(),parent.getRight().getLeft());
+				   rotationLeft(parent,parent.getRight());
+				   parent.setHeight(parent.getHeight()-1);
+				   parent.getParent().setHeight(parent.getParent().getHeight()+1);
+				   moves += 2;
+
+			   }
+
+			  if (sDeltaL == 2 && sDeltaR == 1){ //  case 2Ac sDeltaL == 2 SDeltaR == 1 - single rotation is needed
+
+
+				  rotationLeft(parent,parent.getRight());
+				  parent.setHeight(parent.getHeight()-1);
+
+				  moves += 1;
+
+			  }
+
+			  parent = parent.getParent();
+
+
+		  }else{ // case 2B - dL == 1 & dR == 3
+
+			  int sDeltaL = parent.getLeft().getHeight()-parent.getLeft().getLeft().getHeight(); // we need to observe the status of the leftSon
+			  int sDeltaR = parent.getLeft().getHeight()-parent.getLeft().getRight().getHeight();
+
+			  if (sDeltaL == 1 && sDeltaR == 1){ // case 2Ba sDeltaL == SDeltaR == 1
+
+				  rotationRight(parent,parent.getLeft()); // z , y
+				  parent.getParent().setHeight(parent.getParent().getHeight() + 1); // after the rotation we need also to promote y, z demote included in the rotation method
+				  moves ++;
+
+			  } // case 2Ba sDeltaL == SDeltaR == 1
+
+			  if (sDeltaL == 2 && sDeltaR == 1){ //  case 2Bb sDeltaL == 2 SDeltaR == 1 - double rotation is needed
+
+				  rotationLeft(parent.getLeft(),parent.getLeft().getRight());
+				  rotationRight(parent,parent.getLeft());
+				  parent.setHeight(parent.getHeight()-1);
+				  parent.getParent().setHeight(parent.getParent().getHeight()+1);
+				  moves += 2;
+
+			  }
+
+			  if (sDeltaL == 1 && sDeltaR == 2){ //  case 2Bc sDeltaL == 1 SDeltaR == 2 - single rotation is needed
+
+				  rotationRight(parent,parent.getLeft());
+				  parent.setHeight(parent.getHeight()-1);
+				  moves += 1;
+
+			  }
+
+			  parent = parent.getParent();
+
+		  }
+
+		  parent = parent.getParent();
+
+	  }
+
+
+
+	  return moves;
+	}
+
+	public boolean correctRanks (IAVLNode parent){
+
+	  int dL = parent. getHeight() - parent.getLeft().getHeight();
+	  int dR = parent. getHeight() - parent.getRight().getHeight();
+
+
+	  if ((dL == 1 && dR == 2) || (dL == 2 && dR == 1) || (dL == 1 && dR == 1)){
+		  return true;
+	  }
+	  return false;
+	}
+
+
+
+
+	/**
     * public String min()
     *
     * Returns the info of the item with the smallest key in the tree,
@@ -605,6 +888,36 @@ public class AVLTree {
 	      return this.height; // to be replaced by student code
 	    }
   }
+
+	public static void printBinaryTree(IAVLNode root, int space, int height) {
+		// Base case
+		if (!root.isRealNode()) {
+			return;
+		}
+
+		// increase distance between levels
+		space +=  height;
+
+		// print right child first
+		printBinaryTree(root.getRight(), space, height);
+		System.out.println();
+
+		// print the current node after padding with spaces
+		for (int i = height; i < space; i++) {
+			System.out.print(' ');
+		}
+
+		System.out.print(root.getKey());
+		System.out.print(' ');
+		System.out.print(root.getHeight());
+
+
+		// print left child
+		System.out.println();
+		printBinaryTree(root.getLeft(), space, height);
+	}
+
+
 
 }
   
