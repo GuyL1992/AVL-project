@@ -11,7 +11,7 @@ import java.util.Stack;
 
 public class AVLTree {
 	
-	 public static IAVLNode root = null;
+	 public  IAVLNode root = null;
 	
 	
 	
@@ -122,7 +122,7 @@ public class AVLTree {
    
    public int getMoves(IAVLNode parent) {
 	   int move = 0;
-	   while (parent != null) { // to checkkkk ?
+	   while (parent != null) { //
 		   int deltaRight =parent.getHeight() - parent.getRight().getHeight() ; // the right edge of current node
 		   int deltaLeft = parent.getHeight() -parent.getLeft().getHeight(); // the left edge of the current node
 
@@ -156,8 +156,17 @@ public class AVLTree {
 				   parent.getParent().setHeight(parent.getParent().getHeight()+1);
 				   move +=2;
 				   return move; // then problem solved 
-				   
+
+			   }else if (sDeltaL == 1 && sDeltaR == 1) { // spacial case for Join function
+				   rotationRight(parent, parent.getLeft());
+				   parent.getParent().setHeight(parent.getParent().getHeight() + 1);
+				   parent.setHeight(parent.getParent().getHeight() + 1);
+
+				   move += 1;
+				   return move; // then problem solved
 			   }
+
+
 		   	}
 		   
 		   //case 3B - up to symmetry 
@@ -178,7 +187,17 @@ public class AVLTree {
 					   parent.getParent().setHeight(parent.getParent().getHeight()+1);
 					   move +=2;
 					   return move;
+
+				   }else if (sDeltaL == 1 && sDeltaR == 1) { // spacial case for Join function
+					   rotationLeft(parent, parent.getRight());
+					   parent.getParent().setHeight(parent.getParent().getHeight() + 1);
+					   parent.setHeight(parent.getParent().getHeight() + 1);
+
+					   move += 1;
+					   return move;
 				   }
+
+
 			   
 		   }
 		    
@@ -190,7 +209,7 @@ public class AVLTree {
    // להשלים את המקרה של רוטציה על השורש!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
    
    
-   public static void rotationRight(IAVLNode father , IAVLNode son) {
+   public  void rotationRight(IAVLNode father , IAVLNode son) {
 	   father.setLeft(son.getRight());
 	   son.getRight().setParent(father);
 	   if (father.getParent() != null ) {
@@ -206,7 +225,7 @@ public class AVLTree {
 	  }
 	   else {
 		   son.setParent(null);
-		   root = son;
+		   this.root = son;
 	   }
 	   son.setRight(father);
 	   father.setParent(son);
@@ -214,7 +233,7 @@ public class AVLTree {
 
    }
    
-   public static void rotationLeft(IAVLNode father , IAVLNode son) {
+   public  void rotationLeft(IAVLNode father , IAVLNode son) {
 	   father.setRight(son.getLeft());
 	   son.getLeft().setParent(father);
 	   if (father.getParent() != null ) {
@@ -228,7 +247,7 @@ public class AVLTree {
 	  }
 	   else {
 		   son.setParent(null);
-		   root = son;
+		   this.root = son;
 	   }
 	   son.setLeft(father);
 	   father.setParent(son);
@@ -375,16 +394,16 @@ public class AVLTree {
 		}
 	}
 
-	public static void swapNodes (IAVLNode toBeDeleted, IAVLNode successor){
+	public  void swapNodes (IAVLNode toBeDeleted, IAVLNode successor){
 
 		IAVLNode tempSLeftSon = successor.getLeft();
 		IAVLNode temoSRightSon = successor.getRight();
 		IAVLNode tempSParent = successor.getParent();
 
 
-		if (toBeDeleted == root){
+		if (toBeDeleted == this.root){
 
-			root = successor;
+			this.root = successor;
 			successor.setParent(null);
 
 		}else{
@@ -734,7 +753,206 @@ public class AVLTree {
     */   
    public int join(IAVLNode x, AVLTree t)
    {
-	   return -1;
+
+	   if (this.empty() && t.empty()){
+		   this.root = x;
+		   return 0;
+	   }
+
+	   if (t.empty()){
+		   if (this.root.getKey()>x.getKey()){
+			   x.setRight(this.getRoot());
+			   x.getRight().setParent(x);
+			   x.setHeight(this.root.getHeight()+1);
+			   this.root=x;
+
+		   }
+		   if (this.root.getKey()< x.getKey()){
+			   x.setLeft(this.getRoot());
+			   x.getLeft().setParent(x);
+			   x.setHeight(this.root.getHeight()+1);
+			   this.root=x;
+
+		   }
+		   return 0; // or should be returned 0
+	   }
+	   if (this.empty()){
+	   if (t.root.getKey()>x.getKey()){
+		   x.setRight(t.getRoot());
+		   x.getRight().setParent(x);
+		   x.setHeight(t.root.getHeight()+1);
+		   t.root=x;
+
+	   }
+	   if (t.root.getKey()< x.getKey()){
+		   x.setLeft(t.getRoot());
+		   x.getLeft().setParent(x);
+		   x.setHeight(t.root.getHeight()+1);
+		   t.root=x;
+
+	   }
+		   return 0; // or should be returned 0
+   }
+
+
+	   int timeComplexity = Math.abs(this.getRoot().getHeight() - t.getRoot().getHeight()) + 1;
+
+	   if (this.root.getHeight() == t.root.getHeight()){ // Case 1 - this & t have the same rank
+
+
+
+
+		   if (this.root.getKey() > t.root.getKey()){
+
+
+			   x.setRight(this.getRoot());
+			   this.getRoot().setParent(x);
+
+			   x.setLeft(t.getRoot());
+			   t.getRoot().setParent(x);
+
+			   x.setParent(null);
+			   this.root = x;
+			   t.root = null;
+
+			   x.setHeight(x.getRight().getHeight() + 1);
+		   }
+
+		   else if (this.root.getKey() < t.root.getKey()){
+
+			   x.setRight(t.getRoot());
+			   t.getRoot().setParent(x);
+
+			   x.setLeft(this.getRoot());
+			   this.getRoot().setParent(x);
+
+			   x.setParent(null);
+			   this.root = x;
+			   t.root = null;
+
+			   x.setHeight(x.getRight().getHeight() + 1);
+		   }
+
+
+
+	   }
+
+	   else if(this.getRoot().getHeight() > t.getRoot().getHeight()){ // this.rank > t.rank
+
+		   IAVLNode relevantNode = this.root;
+
+		   if (x.getKey() < this.getRoot().getKey()) {
+
+			   while(relevantNode.getHeight() > t.getRoot().getHeight() && relevantNode.getLeft().isRealNode()){ // going down left
+
+				   relevantNode = relevantNode.getLeft();
+			   }
+
+				   x.setLeft(t.getRoot());
+				   t.getRoot().setParent(x);
+				   x.setRight(relevantNode);
+				   if (relevantNode.getParent()!= null){
+					   x.setParent(relevantNode.getParent());
+					   x.getParent().setLeft(x);
+				   }else{
+					   x.setParent(null);
+					   this.root = x;
+				   }
+				   relevantNode.setParent(x);
+				   x.setHeight(t.getRoot().getHeight()+1);
+				   t.root = null;
+
+		   }else{ //x.getKey() > this.root.getkey
+
+			   while(relevantNode.getHeight() > t.getRoot().getHeight() && relevantNode.getRight().isRealNode()){
+
+				   relevantNode = relevantNode.getRight();
+			   }
+
+			   x.setRight(t.getRoot());
+			   t.getRoot().setParent(x);
+			   x.setLeft(relevantNode);
+			   if (relevantNode.getParent()!= null){
+				   x.setParent(relevantNode.getParent());
+				   x.getParent().setRight(x);
+			   }else{
+				   x.setParent(null);
+				   this.root = x;
+			   }
+			   relevantNode.setParent(x);
+			   x.setHeight(t.getRoot().getHeight()+1);
+			   t.root = null;
+
+		   }
+
+	   }
+	   else  { // this.rank < t.rank
+
+		   IAVLNode relevantNode = t.root;
+
+		   if (x.getKey() < t.getRoot().getKey()) {
+
+			   while (relevantNode.getHeight() > this.getRoot().getHeight() && relevantNode.getLeft().isRealNode() ) {
+
+				   relevantNode = relevantNode.getLeft();
+			   }
+
+			   x.setLeft(this.getRoot());
+			   this.getRoot().setParent(x);
+			   x.setRight(relevantNode);
+
+			   if (relevantNode.getParent()!= null){
+				   x.setParent(relevantNode.getParent());
+				   x.getParent().setLeft(x);
+				   x.setHeight(this.getRoot().getHeight() + 1);
+				   this.root = t.getRoot();
+
+			   }else{
+				   x.setParent(null);
+				   this.root = x;
+				   x.setHeight(this.getRoot().getHeight() + 1);
+			   }
+			   relevantNode.setParent(x);
+
+			   t.root = null;
+
+		   } else { //x.getKey() > t.root.getkey
+
+			   while (relevantNode.getHeight() > this.getRoot().getHeight() && relevantNode.getRight().isRealNode()) {
+
+				   relevantNode = relevantNode.getRight();
+			   }
+
+			   x.setRight(this.getRoot());
+			   this.getRoot().setParent(x);
+			   x.setLeft(relevantNode);
+
+			   if (relevantNode.getParent()!= null){
+				   x.setParent(relevantNode.getParent());
+				   x.getParent().setRight(x);
+				   x.setHeight(this.getRoot().getHeight() + 1);
+				   this.root = t.getRoot();
+
+			   }else{
+				   x.setParent(null);
+				   this.root = x;
+				   x.setHeight(this.getRoot().getHeight() + 1);
+			   }
+
+
+
+			   relevantNode.setParent(x);
+
+			   t.root = null;
+
+		   }
+	   }
+
+	   getMoves(x); // reballancing according to insert function + spacial case
+
+	   return timeComplexity;
+
+
    }
 
 	/** 
@@ -773,11 +991,7 @@ public class AVLTree {
 		   this.parent = node;
 		   
 	   }
-	  
-	  
-	  
-	  
-	  
+
 	  public int getKey()
 		{
 			
