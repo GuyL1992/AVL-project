@@ -1,3 +1,6 @@
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Stack;
 
 /**
@@ -12,6 +15,7 @@ import java.util.Stack;
 public class AVLTree {
 	
 	 public  IAVLNode root = null;
+
 	
 	
 	
@@ -165,6 +169,8 @@ public class AVLTree {
 				   move += 1;
 				   return move; // then problem solved
 			   }
+
+
 
 
 		   	}
@@ -737,9 +743,170 @@ public class AVLTree {
 	* precondition: search(x) != null (i.e. you can also assume that the tree is not empty)
     * postcondition: none
     */   
-   public AVLTree[] split(int x)
-   {
-	   return null; 
+   public AVLTree[] split(int x) {
+	   IAVLNode candidate = SearchNode(root, x);
+	   AVLTree [] splited = new AVLTree[2];
+
+	   if( candidate.equals(root) && !candidate.getLeft().isRealNode() && !candidate.getRight().isRealNode()){
+
+		   return splited;
+	   }
+
+	   int[] sizes = ArraysSizes(candidate);
+
+	   int sN = 0;
+	   int sT = 0;
+	   int gN = 0;
+	   int gT = 0;
+
+	   IAVLNode[] smallerNode = new IAVLNode[sizes[0]];
+	   AVLTree[] smallerTrees = new AVLTree[sizes[1]];
+	   IAVLNode[] greaterNode = new IAVLNode[sizes[2]];
+	   AVLTree[] greaterTrees = new AVLTree[sizes[3]];
+
+	   smallerTrees[0] = new AVLTree();
+
+	   if (candidate.getLeft().isRealNode()){
+
+		   smallerTrees[0].root = candidate.getLeft();
+
+	   }
+	   //smallerTrees[0].root = candidate.getLeft().isRealNode() ? candidate.getLeft() : null;
+
+	   if (smallerTrees[0].root != null){
+		   smallerTrees[0].root.setParent(null);
+	   }
+
+	   candidate.setLeft(new VirtualAVLNode());
+	   candidate.getLeft().setParent(candidate);
+
+	   greaterTrees[0] = new AVLTree();
+
+	   if (candidate.getRight().isRealNode()){
+
+		   greaterTrees[0].root = candidate.getRight();
+
+	   }
+
+	   //greaterTrees[0].root = candidate.getRight().isRealNode() ? candidate.getRight() : null;
+	   if (greaterTrees[0].root != null){
+		   greaterTrees[0].root.setParent(null);
+	   }
+	   candidate.setRight(new VirtualAVLNode());
+	   candidate.getRight().setParent(candidate);
+
+	   sT += 1;
+	   gT += 1;
+
+	   while (candidate.getParent() != null) {
+
+		   if (candidate.getParent().getRight() == candidate) {
+
+			   smallerTrees[sT] = new AVLTree();
+
+			   if (candidate.getParent().getLeft().isRealNode()){
+
+				   smallerTrees[sT].root = candidate.getParent().getLeft();
+				   smallerTrees[sT].root.setParent(null);
+
+			   }
+
+			   candidate.getParent().setLeft(new VirtualAVLNode());
+			   candidate.getParent().getLeft().setParent(candidate.getParent());
+
+			   sT += 1;
+
+			   smallerNode[sN] = candidate.getParent();
+			   candidate = candidate.getParent();
+			   candidate.setRight(new VirtualAVLNode());
+			   candidate.getRight().setParent(candidate);
+
+			   sN += 1;
+
+		   }else{
+
+			   greaterTrees[gT] = new AVLTree();
+
+			   if (candidate.getParent().getRight().isRealNode()){
+
+				   greaterTrees[gT].root = candidate.getParent().getRight();
+				   greaterTrees[gT].root.setParent(null);
+
+			   }
+
+			   candidate.getParent().setRight(new VirtualAVLNode());
+			   candidate.getParent().getRight().setParent(candidate.getParent());
+
+			   gT += 1;
+
+			   greaterNode[gN] = candidate.getParent();
+			   candidate = candidate.getParent();
+			   candidate.setLeft(new VirtualAVLNode());
+			   candidate.getLeft().setParent(candidate);
+
+			   gN += 1;
+
+		   }
+
+	   }
+
+
+	   AVLTree smaller = smallerTrees[0];
+	   AVLTree greater = greaterTrees [0];
+
+	   for (int i = 0; i < smallerNode.length; i++){
+
+		   smaller.join(smallerNode[i],smallerTrees[i+1]);
+
+	   }
+
+	   for (int i = 0; i < greaterNode.length; i++){
+
+		   greater.join(greaterNode[i],greaterTrees[i+1]);
+	   }
+
+	   splited [0] = smaller;
+	   splited [1] = greater;
+
+	   return splited;
+
+   }
+
+
+
+
+   public int [] ArraysSizes (IAVLNode candidate){
+
+	  int [] sizes = new int [4];
+	   int smallerNodes = 0;
+	   int smallerTrees = 1;
+	   int greaterNodes = 0;
+	   int greaterTress = 1;
+
+
+	   while (candidate.getParent() != null){
+
+		   if (candidate.getParent().getRight() == candidate){
+
+			   smallerNodes +=1;
+			   smallerTrees +=1;
+
+		   }else{
+
+			   greaterNodes+=1;
+			   greaterTress+=1;
+
+		   }
+		   candidate = candidate.getParent();
+	   }
+
+	   sizes [0] = smallerNodes;
+	   sizes [1] = smallerTrees;
+	   sizes [2] =greaterNodes;
+	   sizes [3] = greaterTress;
+
+	   return sizes;
+
    }
    
    /**
@@ -759,12 +926,13 @@ public class AVLTree {
 		   return 0;
 	   }
 
-	   if (t.empty()){
+	  /* if (t.empty()){
 		   if (this.root.getKey()>x.getKey()){
 			   x.setRight(this.getRoot());
 			   x.getRight().setParent(x);
 			   x.setHeight(this.root.getHeight()+1);
 			   this.root=x;
+			   getMoves(x);
 
 		   }
 		   if (this.root.getKey()< x.getKey()){
@@ -772,16 +940,20 @@ public class AVLTree {
 			   x.getLeft().setParent(x);
 			   x.setHeight(this.root.getHeight()+1);
 			   this.root=x;
+			   getMoves(x);
+
 
 		   }
 		   return 0; // or should be returned 0
 	   }
+
 	   if (this.empty()){
 	   if (t.root.getKey()>x.getKey()){
 		   x.setRight(t.getRoot());
 		   x.getRight().setParent(x);
 		   x.setHeight(t.root.getHeight()+1);
 		   t.root=x;
+		   getMoves(x);
 
 	   }
 	   if (t.root.getKey()< x.getKey()){
@@ -789,18 +961,35 @@ public class AVLTree {
 		   x.getLeft().setParent(x);
 		   x.setHeight(t.root.getHeight()+1);
 		   t.root=x;
+		   getMoves(x);
+
 
 	   }
 		   return 0; // or should be returned 0
-   }
+   }*/
 
+	   if(t.root == null){
+
+		   this.insert(x.getKey(),x.getValue());
+
+		   return (this.root.getHeight());
+
+	   }
+
+	   if(this.root == null){
+
+		   t.insert(x.getKey(),x.getValue());
+
+		   this.root = t.root;
+		   t.root = null;
+
+		   return (this.root.getHeight());
+
+	   }
 
 	   int timeComplexity = Math.abs(this.getRoot().getHeight() - t.getRoot().getHeight()) + 1;
 
 	   if (this.root.getHeight() == t.root.getHeight()){ // Case 1 - this & t have the same rank
-
-
-
 
 		   if (this.root.getKey() > t.root.getKey()){
 
@@ -843,7 +1032,7 @@ public class AVLTree {
 
 		   if (x.getKey() < this.getRoot().getKey()) {
 
-			   while(relevantNode.getHeight() > t.getRoot().getHeight() && relevantNode.getLeft().isRealNode()){ // going down left
+			   while(relevantNode.getHeight() > t.getRoot().getHeight() && relevantNode.getLeft().isRealNode() && relevantNode.getHeight() > 0){ // going down left
 
 				   relevantNode = relevantNode.getLeft();
 			   }
@@ -864,7 +1053,7 @@ public class AVLTree {
 
 		   }else{ //x.getKey() > this.root.getkey
 
-			   while(relevantNode.getHeight() > t.getRoot().getHeight() && relevantNode.getRight().isRealNode()){
+			   while(relevantNode.getHeight() > t.getRoot().getHeight() && relevantNode.getRight().isRealNode() && relevantNode.getHeight() > 0){
 
 				   relevantNode = relevantNode.getRight();
 			   }
@@ -892,7 +1081,7 @@ public class AVLTree {
 
 		   if (x.getKey() < t.getRoot().getKey()) {
 
-			   while (relevantNode.getHeight() > this.getRoot().getHeight() && relevantNode.getLeft().isRealNode() ) {
+			   while (relevantNode.getHeight() > this.getRoot().getHeight() && relevantNode.getLeft().isRealNode() && relevantNode.getHeight() > 0) {
 
 				   relevantNode = relevantNode.getLeft();
 			   }
@@ -918,7 +1107,7 @@ public class AVLTree {
 
 		   } else { //x.getKey() > t.root.getkey
 
-			   while (relevantNode.getHeight() > this.getRoot().getHeight() && relevantNode.getRight().isRealNode()) {
+			   while (relevantNode.getHeight() > this.getRoot().getHeight() && relevantNode.getRight().isRealNode() && relevantNode.getHeight() > 0) {
 
 				   relevantNode = relevantNode.getRight();
 			   }
@@ -948,7 +1137,7 @@ public class AVLTree {
 		   }
 	   }
 
-	   getMoves(x); // reballancing according to insert function + spacial case
+	   getMoves(x.getParent()); // reballancing according to insert function + spacial case
 
 	   return timeComplexity;
 
@@ -990,6 +1179,12 @@ public class AVLTree {
 		  
 		   this.parent = node;
 		   
+	   }
+
+	   public VirtualAVLNode () {
+
+		   this.parent = null;
+
 	   }
 
 	  public int getKey()
@@ -1129,6 +1324,113 @@ public class AVLTree {
 		// print left child
 		System.out.println();
 		printBinaryTree(root.getLeft(), space, height);
+	}
+
+	public void print() {
+		IAVLNode root=this.root;
+		List<List<String>> lines = new ArrayList<List<String>>();
+
+		List<IAVLNode> level = new ArrayList<IAVLNode>();
+		List<IAVLNode> next = new ArrayList<IAVLNode>();
+
+		level.add(root);
+		int nn = 1;
+
+		int widest = 0;
+
+		while (nn != 0) {
+			List<String> line = new ArrayList<String>();
+
+			nn = 0;
+
+			for (IAVLNode n : level) {
+				if (n==null) {
+					line.add(null);
+
+					next.add(null);
+					next.add(null);
+				} else {
+					String aa = Integer.toString(n.getKey());
+					line.add(aa);
+					if (aa.length() > widest) widest = aa.length();
+
+					next.add(n.getLeft());
+					next.add(n.getRight());
+
+					if (n.getLeft() != null) nn++;
+					if (n.getRight() != null) nn++;
+				}
+			}
+
+			if (widest % 2 == 1) widest++;
+
+			lines.add(line);
+
+			List<IAVLNode> tmp = level;
+			level = next;
+			next = tmp;
+			next.clear();
+		}
+
+		int perpiece = lines.get(lines.size() - 1).size() * (widest + 4);
+		for (int i = 0; i < lines.size(); i++) {
+			List<String> line = lines.get(i);
+			int hpw = (int) Math.floor(perpiece / 2f) - 1;
+
+			if (i > 0) {
+				for (int j = 0; j < line.size(); j++) {
+
+					// split node
+					char c = ' ';
+					if (j % 2 == 1) {
+						if (line.get(j - 1) != null) {
+							c = (line.get(j) != null) ? '┴' : '┘';
+						} else {
+							if (j < line.size() && line.get(j) != null) c = '└';
+						}
+					}
+					System.out.print(c);
+
+					// lines and spaces
+					if (line.get(j) == null) {
+						for (int k = 0; k < perpiece - 1; k++) {
+							System.out.print(" ");
+						}
+					} else {
+
+						for (int k = 0; k < hpw; k++) {
+							System.out.print(j % 2 == 0 ? " " : "─");
+						}
+						System.out.print(j % 2 == 0 ? "┌" : "┐");
+						for (int k = 0; k < hpw; k++) {
+							System.out.print(j % 2 == 0 ? "─" : " ");
+						}
+					}
+				}
+				System.out.println();
+			}
+
+			// print line of numbers
+			for (int j = 0; j < line.size(); j++) {
+
+				String f = line.get(j);
+				if (f == null) f = "";
+				int gap1 = (int) Math.ceil(perpiece / 2f - f.length() / 2f);
+				int gap2 = (int) Math.floor(perpiece / 2f - f.length() / 2f);
+
+				// a number
+				for (int k = 0; k < gap1; k++) {
+					System.out.print(" ");
+				}
+				System.out.print(f);
+				for (int k = 0; k < gap2; k++) {
+					System.out.print(" ");
+				}
+			}
+			System.out.println();
+
+			perpiece /= 2;
+		}
 	}
 
 

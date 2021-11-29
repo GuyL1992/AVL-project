@@ -1,38 +1,32 @@
+
+
 public class Test {
 
 public static void main (String args[]) {
 	
 	
-	AVLTree avlTree = new AVLTree();
+	AVLTree avlTree1 = new AVLTree();
+    AVLTree avlTree2 = new AVLTree();
 
-    for(int i = 0; i < 10; i ++){
-        avlTree.insert(i, "yair");
+    for(int i = 0; i < 9; i ++) {
+        avlTree1.insert(i, "yair");
     }
 
-    System.out.println(avlTree.delete(3));
-    System.out.println(avlTree.delete(2));
-    System.out.println(avlTree.delete(7));
-    System.out.println(avlTree.delete(8));
+    //avlTree1.print();
+
+    //AVLTree.printBinaryTree(avlTree1.root, 0, 5);
+
+
+
+    AVLTree [] splited = avlTree1.split(4);
 
 
 
 
 
+  splited[0].print();
+  splited[1].print();
 
-
-
-
-
-
-
-    //System.out.println(avlTree.delete(6));
-    //System.out.println(avlTree.root.getRight().getHeight());
-
-    //avlTree.insert(8,"guy");
-
-    AVLTree.printBinaryTree(avlTree.getRoot(), 0,5);
-
-	
 }
 
 	
@@ -64,8 +58,8 @@ public static void main (String args[]) {
         }
         return (avlTree.size() == 1000);
     }
-/*
-    public boolean delete() {
+
+    public static boolean delete() {
         AVLTree avlTree = new AVLTree();
         if (avlTree.delete(1) != -1) {
             return false;
@@ -76,7 +70,7 @@ public static void main (String args[]) {
         return true;
     }
 
-    public boolean min() {
+    public static boolean min() {
         AVLTree avlTree = new AVLTree();
         if (avlTree.min() != null) {
             return false;
@@ -87,7 +81,7 @@ public static void main (String args[]) {
         return (avlTree.min().equals("num0"));
     }
 
-    public boolean max() {
+    public static boolean max() {
         AVLTree avlTree = new AVLTree();
         if (avlTree.max() != null) {
             return false;
@@ -135,7 +129,7 @@ public static void main (String args[]) {
         }
         return (avlTree.size() == 75);
     }
-
+/*
     public boolean split() {
         AVLTree avlTree = new AVLTree();
         for (int i = 0; i < 1000; i++) {
@@ -159,8 +153,9 @@ public static void main (String args[]) {
         ActualAVLTree.IAVLNode avlNode = (ActualAVLTree.IAVLNode) avlTree.getRoot();
         return true;
     }
+ */
 
-    public boolean checkBalanceOfTree(AVLTree.IAVLNode current) {
+    public static boolean checkBalanceOfTree(AVLTree.IAVLNode current) {
         boolean balancedRight = true, balancedLeft = true;
         int leftHeight = 0, rightHeight = 0;
         if (current.getRight() != null) {
@@ -175,7 +170,7 @@ public static void main (String args[]) {
         return balancedLeft && balancedRight && Math.abs(leftHeight - rightHeight) < 2;
     }
 
-    private int getDepth(AVLTree.IAVLNode n) {
+    private static int getDepth(AVLTree.IAVLNode n) {
         int leftHeight = 0, rightHeight = 0;
 
         if (n.getRight() != null)
@@ -186,7 +181,7 @@ public static void main (String args[]) {
         return Math.max(rightHeight, leftHeight) + 1;
     }
 
-    private boolean checkOrderingOfTree(AVLTree.IAVLNode current) {
+    private static boolean checkOrderingOfTree(AVLTree.IAVLNode current) {
         if (current.getLeft().isRealNode()) {
             if (Integer.parseInt(current.getLeft().getValue()) > Integer.parseInt(current.getValue()))
                 return false;
@@ -203,7 +198,7 @@ public static void main (String args[]) {
         return true;
     }
 
-    public boolean testRemove() {
+    public static boolean testRemove() {
         AVLTree tree = new AVLTree();
         if (!tree.empty()) {
             return false;
@@ -334,6 +329,6 @@ public static void main (String args[]) {
         }
         return true;
     }
-*/
+
 }
 
