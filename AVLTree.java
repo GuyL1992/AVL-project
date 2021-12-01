@@ -74,7 +74,7 @@ public class AVLTree {
    */
    public int insert(int k, String i) {
 	   
-	   if (root == null) {  // Spacial case, if the tree is empty, insert the new element as the tree root
+	   if (root == null) {  // Spacial case, if the tree is empty, insert the new element as the tree root, size = 1
 		   root = new AVLNode(k,i);
 		   return 0;
 	   }
@@ -108,7 +108,7 @@ public class AVLTree {
    
    private void Insertion (IAVLNode node, int k, String i) {
 
-	   IAVLNode newNode = new AVLNode(k,i);
+	   IAVLNode newNode = new AVLNode(k,i); // creating a new node for the new key
 
 	   if (k < node.getKey()) {
 		   
@@ -120,8 +120,13 @@ public class AVLTree {
 	   }
 
 	   newNode.setParent(node);
-	   
-	   
+
+	   while(node != null){ // using this ehile loop to update the sizes of the relevant nodes
+
+		   node.setSize(node.getSize() + 1);
+		   node = node.getParent();
+	   }
+
    }
    
    public int getMoves(IAVLNode parent) {
@@ -237,6 +242,9 @@ public class AVLTree {
 	   father.setParent(son);
 	   father.setHeight(father.getHeight()-1);
 
+	   father.setSize(father.getLeft().getSize() + father.getRight().getSize() + 1);
+	   son.setSize(son.getLeft().getSize() + son.getRight().getSize() + 1);
+
    }
    
    public  void rotationLeft(IAVLNode father , IAVLNode son) {
@@ -258,6 +266,9 @@ public class AVLTree {
 	   son.setLeft(father);
 	   father.setParent(son);
 	   father.setHeight(father.getHeight()-1);
+
+	   father.setSize(father.getLeft().getSize() + father.getRight().getSize() + 1);
+	   son.setSize(son.getLeft().getSize() + son.getRight().getSize() + 1);
 
    }
    
@@ -292,6 +303,8 @@ public class AVLTree {
 		  return -1;
 	  }
 
+
+
 	  IAVLNode parent = deletion(toBeDeleted); // parent is the node which the correction should be start from
 
 	  if (parent == null){ // edge case 2 - tree size == 1
@@ -303,7 +316,7 @@ public class AVLTree {
 	  return getMovesdelete(parent);
   }
 
-	public IAVLNode deletion (IAVLNode toBeDeleted){ // executing the deletion, and return the node wich the correction should be start from
+	public IAVLNode deletion (IAVLNode toBeDeleted){ // executing the deletion, and return the node which the correction should be start from
 
 		IAVLNode parent = toBeDeleted.getParent();
 
@@ -364,9 +377,17 @@ public class AVLTree {
 
 			swapNodes(toBeDeleted,successor); // O(1)
 
-
 			 parent = deletion(toBeDeleted);
 
+		}
+
+		IAVLNode tempparent = parent;
+
+		while (tempparent != null){ // going up to the root and updating the size field the relevant node
+
+			tempparent.setSize(tempparent.getLeft().getSize() + tempparent.getRight().getSize() + 1);
+
+			tempparent = tempparent.getParent();
 		}
 
 		return parent;
@@ -698,30 +719,12 @@ public class AVLTree {
     */
    public int size()
    {
-	   int cnt=0;
-	   if (root == null)
+	   if (this.empty()){
 		   return 0;
-		  IAVLNode node = root;
-		  Stack tempstack = new Stack();
+	   }else{
 
-		  
-		  while (true) {
-			  if (node.isRealNode() ) {
-				  tempstack.push(node);
-				  node=node.getLeft();
-			  }
-			  else if (! tempstack.isEmpty()) {
-				  node = (AVLTree.IAVLNode) tempstack.pop();
-				  cnt++;
-				  node=node.getRight();
-				  
-			  }
-			  else {
-				  break;
-			  }
-			  
-		  }
-		  return cnt;
+		   return root.getSize();
+	   }
    }
    
    /**
@@ -747,7 +750,7 @@ public class AVLTree {
 	   IAVLNode candidate = SearchNode(root, x);
 	   AVLTree [] splited = new AVLTree[2];
 
-	   if( candidate.equals(root) && !candidate.getLeft().isRealNode() && !candidate.getRight().isRealNode()){
+	   if( candidate.equals(root) && !candidate.getLeft().isRealNode() && !candidate.getRight().isRealNode()){ // only have one node
 
 		   return splited;
 	   }
@@ -921,54 +924,13 @@ public class AVLTree {
    public int join(IAVLNode x, AVLTree t)
    {
 
-	   if (this.empty() && t.empty()){
+	   if (this.empty() && t.empty()){ // edge case - joining two empty trees
 		   this.root = x;
+		   this.root.setSize(1);
 		   return 0;
 	   }
 
-	  /* if (t.empty()){
-		   if (this.root.getKey()>x.getKey()){
-			   x.setRight(this.getRoot());
-			   x.getRight().setParent(x);
-			   x.setHeight(this.root.getHeight()+1);
-			   this.root=x;
-			   getMoves(x);
-
-		   }
-		   if (this.root.getKey()< x.getKey()){
-			   x.setLeft(this.getRoot());
-			   x.getLeft().setParent(x);
-			   x.setHeight(this.root.getHeight()+1);
-			   this.root=x;
-			   getMoves(x);
-
-
-		   }
-		   return 0; // or should be returned 0
-	   }
-
-	   if (this.empty()){
-	   if (t.root.getKey()>x.getKey()){
-		   x.setRight(t.getRoot());
-		   x.getRight().setParent(x);
-		   x.setHeight(t.root.getHeight()+1);
-		   t.root=x;
-		   getMoves(x);
-
-	   }
-	   if (t.root.getKey()< x.getKey()){
-		   x.setLeft(t.getRoot());
-		   x.getLeft().setParent(x);
-		   x.setHeight(t.root.getHeight()+1);
-		   t.root=x;
-		   getMoves(x);
-
-
-	   }
-		   return 0; // or should be returned 0
-   }*/
-
-	   if(t.root == null){
+	   if(t.root == null){ // t is an empty Tree
 
 		   this.insert(x.getKey(),x.getValue());
 
@@ -976,7 +938,7 @@ public class AVLTree {
 
 	   }
 
-	   if(this.root == null){
+	   if(this.root == null){ // 'this' is an empty Tree
 
 		   t.insert(x.getKey(),x.getValue());
 
@@ -1020,6 +982,7 @@ public class AVLTree {
 			   t.root = null;
 
 			   x.setHeight(x.getRight().getHeight() + 1);
+
 		   }
 
 
@@ -1129,12 +1092,23 @@ public class AVLTree {
 			   }
 
 
-
 			   relevantNode.setParent(x);
 
 			   t.root = null;
 
 		   }
+	   }
+
+	   x.setSize(x.getLeft().getSize() + x.getRight().getSize() + 1);
+
+	   IAVLNode xTemp = x;
+
+	   while (xTemp != null){
+
+		   xTemp.setSize(xTemp.getLeft().getSize() + xTemp.getRight().getSize() + 1);
+
+		   xTemp = xTemp.getParent();
+
 	   }
 
 	   getMoves(x.getParent()); // reballancing according to insert function + spacial case
@@ -1160,6 +1134,8 @@ public class AVLTree {
 		public boolean isRealNode(); // Returns True if this is a non-virtual AVL node.
     	public void setHeight(int height); // Sets the height of the node.
     	public int getHeight(); // Returns the height of the node (-1 for virtual nodes).
+		public int getSize();
+		public void setSize(int size);
 	}
 
    /** 
@@ -1228,7 +1204,14 @@ public class AVLTree {
 	    public int getHeight()
 	    {
 	      return -1; 
-	    } 
+	    }
+
+	   public int getSize(){
+		  return 0;
+	   }
+	   public void setSize(int size){
+
+	   }
 	  
 	  
 	  
@@ -1238,6 +1221,7 @@ public class AVLTree {
 	  
 	   int key;
 	   int height;
+	   int size;
 	   String info;
 	   IAVLNode left;
 	   IAVLNode right;
@@ -1246,6 +1230,7 @@ public class AVLTree {
 	   public AVLNode (int k, String i) {
 		   this.key=k;
 		   this.info=i;
+		   this.size = 1;
 		   this.left  =  new VirtualAVLNode(this) ;
 		   this.right = new VirtualAVLNode(this) ;
 	   }
@@ -1296,6 +1281,15 @@ public class AVLTree {
 	    {
 	      return this.height; // to be replaced by student code
 	    }
+
+	  public int getSize(){
+		  return this.size;
+	  }
+	  public void setSize(int size){
+
+		   this.size = size;
+
+	  }
   }
 
 	public static void printBinaryTree(IAVLNode root, int space, int height) {
@@ -1318,7 +1312,7 @@ public class AVLTree {
 
 		System.out.print(root.getKey());
 		System.out.print(' ');
-		System.out.print(root.getHeight());
+		System.out.print(root.getSize());
 
 
 		// print left child
